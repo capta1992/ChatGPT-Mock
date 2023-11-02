@@ -11,6 +11,7 @@ class ChatMessageCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        configureUI()
     }
     
     required init?(coder: NSCoder) {
@@ -18,6 +19,6 @@ class ChatMessageCell: UITableViewCell {
     }
     
     func configureUI() {
-        
+        backgroundColor = .blue
     }
 }
