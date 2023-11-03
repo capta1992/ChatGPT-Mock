@@ -31,6 +31,11 @@ class ChatViewController: UIViewController {
         return button
     }()
     
+    private let chatGPTLabel: UILabel = {
+        let label = UILabel()
+        return label
+    }()
+    
     private let segmentedControl: UISegmentedControl = {
         let items = ["GPT-3.5", "GPT-4"]
         let segmentedControl = UISegmentedControl(items: items)
@@ -75,8 +80,8 @@ class ChatViewController: UIViewController {
         stack.spacing = 5
         return stack
     }()
-
-
+    
+    
     private let cameraButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "camera"), for: .normal)
@@ -128,91 +133,83 @@ class ChatViewController: UIViewController {
     }
     
     private func setupUIComponents() {
-        // Adding main UI components to the view
-        view.addSubview(leftNavbutton)
-        view.addSubview(rightNavButton)
-        view.addSubview(segmentedControl) // Comment out this line to not display the segmented control
-        view.addSubview(suggestionsCollectionView)
         view.addSubview(chatTableView)
         view.addSubview(chatContainerView)
         
-        // Setting up the bottomStackView with its subviews
         chatContainerView.addSubview(bottomStackView)
+        chatContainerView.addSubview(suggestionsCollectionView)
+        
         bottomStackView.addArrangedSubview(cameraButton)
         bottomStackView.addArrangedSubview(messageInputField)
+        bottomStackView.addArrangedSubview(photoBadgeButton)
         bottomStackView.addArrangedSubview(folderButton)
+        
+        // Custom Navigation Bar Components
+        view.addSubview(leftNavbutton)
+        view.addSubview(rightNavButton)
+        view.addSubview(segmentedControl)
         
         setupLayoutConstraints()
     }
+    
     private func setupLayoutConstraints() {
-        chatContainerView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        cameraButton.translatesAutoresizingMaskIntoConstraints = false
-        folderButton.translatesAutoresizingMaskIntoConstraints = false
-        leftNavbutton.translatesAutoresizingMaskIntoConstraints = false
-        bottomStackView.translatesAutoresizingMaskIntoConstraints = false
-        rightNavButton.translatesAutoresizingMaskIntoConstraints = false
-        segmentedControl.translatesAutoresizingMaskIntoConstraints = false
-        chatTableView.translatesAutoresizingMaskIntoConstraints = false
-        messageInputField.translatesAutoresizingMaskIntoConstraints = false
-        suggestionsCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        // Left Nav Button
+        leftNavbutton.anchor(
+            top: view.safeAreaLayoutGuide.topAnchor,
+            left: view.leftAnchor,
+            paddingTop: 16,
+            paddingLeft: 16
+        )
         
-        NSLayoutConstraint.activate([
-            // Left Navigation Button
-            leftNavbutton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            leftNavbutton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            
-            // Right Navigation Button
-            rightNavButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            rightNavButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            
-            // Segmented Control (GPT-3.5 and GPT-4)
-            segmentedControl.topAnchor.constraint(equalTo: leftNavbutton.bottomAnchor, constant: 20),
-            segmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            segmentedControl.widthAnchor.constraint(equalToConstant: 200),
-            
-            // Suggestions Collection View
-            suggestionsCollectionView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 10),
-            suggestionsCollectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            suggestionsCollectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            suggestionsCollectionView.bottomAnchor.constraint(equalTo: chatContainerView.topAnchor, constant: -10), // Adjusted this to be 10pts above chatContainerView
-            suggestionsCollectionView.heightAnchor.constraint(equalToConstant: 50),
-            
-            // Chat Container View
-            chatContainerView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            chatContainerView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            chatContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            chatContainerView.heightAnchor.constraint(equalToConstant: 60), // Adjust based on your requirements
-            
-            // Chat TableView
-            chatTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            chatTableView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            chatTableView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            chatTableView.bottomAnchor.constraint(equalTo: chatContainerView.topAnchor), // Fix here
-            
-            // Bottom Stack View (contains Message Input and other buttons)
-            bottomStackView.bottomAnchor.constraint(equalTo: chatContainerView.bottomAnchor),
-            bottomStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            bottomStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            bottomStackView.heightAnchor.constraint(equalTo: chatContainerView.heightAnchor),
-
-            // Message Input Field
-            messageInputField.leadingAnchor.constraint(equalTo: cameraButton.trailingAnchor, constant: 10),
-            messageInputField.trailingAnchor.constraint(equalTo: folderButton.leadingAnchor, constant: -10),
-            messageInputField.centerYAnchor.constraint(equalTo: bottomStackView.centerYAnchor),
-            messageInputField.heightAnchor.constraint(equalToConstant: 40),
-            
-            // Camera and Folder Buttons
-            cameraButton.leadingAnchor.constraint(equalTo: bottomStackView.leadingAnchor, constant: 10),
-            cameraButton.centerYAnchor.constraint(equalTo: bottomStackView.centerYAnchor),
-            cameraButton.widthAnchor.constraint(equalToConstant: 40), // Assuming a square button
-            cameraButton.heightAnchor.constraint(equalToConstant: 40),
-            
-            folderButton.trailingAnchor.constraint(equalTo: bottomStackView.trailingAnchor, constant: -10),
-            folderButton.centerYAnchor.constraint(equalTo: bottomStackView.centerYAnchor),
-            folderButton.widthAnchor.constraint(equalToConstant: 40), // Assuming a square button
-            folderButton.heightAnchor.constraint(equalToConstant: 40),
-        ])
+        // Right Nav Button
+        rightNavButton.anchor(
+            top: view.safeAreaLayoutGuide.topAnchor,
+            right: view.rightAnchor,
+            paddingTop: 16,
+            paddingRight: 16
+        )
+        
+        // Segmented Control
+        segmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        segmentedControl.anchor(
+            top: leftNavbutton.bottomAnchor,
+            paddingTop: 8
+        )
+        
+        // Chat TableView
+        chatTableView.anchor(
+            top: segmentedControl.bottomAnchor,
+            left: view.leftAnchor,
+            bottom: chatContainerView.topAnchor,
+            right: view.rightAnchor
+        )
+        
+        // ChatContainerView
+        chatContainerView.anchor(
+            left: view.leftAnchor,
+            bottom: view.safeAreaLayoutGuide.bottomAnchor,
+            right: view.rightAnchor,
+            height: 200 // Adjust height based on your needs
+        )
+        
+        // Suggestions CollectionView
+        suggestionsCollectionView.anchor(
+            top: chatContainerView.topAnchor,
+            left: chatContainerView.leftAnchor,
+            right: chatContainerView.rightAnchor,
+            height: 150 // Adjust based on your needs
+        )
+        
+        // Bottom Stack View
+        bottomStackView.anchor(
+            top: suggestionsCollectionView.bottomAnchor,
+            left: chatContainerView.leftAnchor,
+            bottom: chatContainerView.bottomAnchor,
+            right: chatContainerView.rightAnchor,
+            paddingLeft: 10,
+            paddingBottom: 10,
+            paddingRight: 10
+        )
     }
 }
 
