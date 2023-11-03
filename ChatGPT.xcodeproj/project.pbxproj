@@ -31,6 +31,7 @@
 		1C554B242AF2068C001C4FD1 /* BasicNetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C554B232AF2068C001C4FD1 /* BasicNetworkingService.swift */; };
 		1C554B2A2AF33660001C4FD1 /* MessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C554B292AF33660001C4FD1 /* MessageCell.swift */; };
 		1C554B2E2AF35C66001C4FD1 /* ChatMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C554B2D2AF35C66001C4FD1 /* ChatMessageCell.swift */; };
+		1CCFD4412AF4884F00A54D18 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CCFD4402AF4884F00A54D18 /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 		1C554B232AF2068C001C4FD1 /* BasicNetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicNetworkingService.swift; sourceTree = "<group>"; };
 		1C554B292AF33660001C4FD1 /* MessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCell.swift; sourceTree = "<group>"; };
 		1C554B2D2AF35C66001C4FD1 /* ChatMessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageCell.swift; sourceTree = "<group>"; };
+		1CCFD4402AF4884F00A54D18 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				1C554AFD2AF0ACB4001C4FD1 /* ViewModel */,
 				1C554AFC2AF0ACB1001C4FD1 /* Controllers */,
 				1C554AFB2AF0ACA9001C4FD1 /* API */,
+				1CCFD43F2AF4881D00A54D18 /* Utils */,
 				1C554AFA2AF0AC88001C4FD1 /* Supporting Files */,
 				1C554AD82AF0AC59001C4FD1 /* Info.plist */,
 			);
@@ -226,6 +229,14 @@
 				1C554B212AF203CA001C4FD1 /* ChatGPTServiceDependencies.swift */,
 			);
 			name = Networking;
+			sourceTree = "<group>";
+		};
+		1CCFD43F2AF4881D00A54D18 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				1CCFD4402AF4884F00A54D18 /* Extensions.swift */,
+			);
+			name = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -366,6 +377,7 @@
 				1C554B0E2AF0D429001C4FD1 /* NetworkingError.swift in Sources */,
 				1C554B222AF203CA001C4FD1 /* ChatGPTServiceDependencies.swift in Sources */,
 				1C554B1C2AF1F941001C4FD1 /* NetworkingServiceImp.swift in Sources */,
+				1CCFD4412AF4884F00A54D18 /* Extensions.swift in Sources */,
 				1C554B202AF200DC001C4FD1 /* NetworkingService.swift in Sources */,
 				1C554B012AF0AD25001C4FD1 /* ChatViewController.swift in Sources */,
 				1C554B122AF1F30A001C4FD1 /* WireAPIResponse.swift in Sources */,

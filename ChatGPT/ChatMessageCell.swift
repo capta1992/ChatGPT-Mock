@@ -21,4 +21,8 @@ class ChatMessageCell: UITableViewCell {
     func configureUI() {
         backgroundColor = .blue
     }
+    
+    private func configureNavController() {
+        print("Do Something I want git hub GUI to react")
+    }
 }

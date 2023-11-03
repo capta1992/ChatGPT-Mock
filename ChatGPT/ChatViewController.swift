@@ -131,7 +131,7 @@ class ChatViewController: UIViewController {
         // Adding main UI components to the view
         view.addSubview(leftNavbutton)
         view.addSubview(rightNavButton)
-      //  view.addSubview(segmentedControl) // Comment out this line to not display the segmented control
+        view.addSubview(segmentedControl) // Comment out this line to not display the segmented control
         view.addSubview(suggestionsCollectionView)
         view.addSubview(chatTableView)
         view.addSubview(chatContainerView)
