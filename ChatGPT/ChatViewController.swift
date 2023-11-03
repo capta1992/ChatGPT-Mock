@@ -11,6 +11,7 @@ private enum Constants {
     static let navigationTitle: String = "Chat-GPT"
     static let reuseIdentifier: String = "SuggestionsPromptCell"
     static let tableReuseIdentifier: String = "MessageCell"
+    static let chatGPTLabelText: String = "ChatGPT"
 }
 
 class ChatViewController: UIViewController {
@@ -19,23 +20,37 @@ class ChatViewController: UIViewController {
     
     private let leftNavbutton: UIButton = {
         let button = UIButton()
-        button.setTitle("<", for: .normal)
+        button.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
         button.tintColor = .white
         return button
     }()
     
     private let rightNavButton: UIButton = {
         let button = UIButton()
-        button.setTitle(">", for: .normal)
+        button.setImage(UIImage(systemName: "text.alignleft"), for: .normal)
         button.tintColor = .white
         return button
     }()
+
     
     private let chatGPTLabel: UILabel = {
         let label = UILabel()
+        label.text = Constants.chatGPTLabelText
+        label.textColor = .white
+        label.font = UIFont.boldSystemFont(ofSize: 24)
+        label.textAlignment = .center
+        label.alpha = 0
         return label
     }()
     
+    private let orangeCircle: UIView = {
+        let view = UIView()
+        view.backgroundColor = .orange
+        view.layer.cornerRadius = 20 // This will give you a circle of diameter 40
+        view.alpha = 0
+        return view
+    }()
+
     private let segmentedControl: UISegmentedControl = {
         let items = ["GPT-3.5", "GPT-4"]
         let segmentedControl = UISegmentedControl(items: items)
@@ -63,10 +78,12 @@ class ChatViewController: UIViewController {
     private let messageInputField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .gray
-        textField.placeholder = "Message"
+        textField.placeholder = " Message"
+        textField.layer.cornerRadius = 10
+        textField.clipsToBounds = true
         return textField
     }()
-    
+
     private let chatContainerView: UIView = {
         let view = UIView()
         view.backgroundColor = .darkGray
@@ -114,6 +131,11 @@ class ChatViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        
+        // Call the animation after a delay to ensure view layouit is complete
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.animateChatGPTLabel()
+        }
     }
     
     // MARK: - Helpers
@@ -121,6 +143,35 @@ class ChatViewController: UIViewController {
         view.backgroundColor = .black
         setupNavigationBar()
         setupUIComponents()
+        
+        chatGPTLabel.numberOfLines = 0
+        chatGPTLabel.adjustsFontSizeToFitWidth = true
+        
+        // Create a horizontal stack view
+        let horizontalStackView = UIStackView(arrangedSubviews: [chatGPTLabel, orangeCircle])
+        horizontalStackView.axis = .horizontal
+        horizontalStackView.spacing = 2
+        horizontalStackView.distribution = .fill
+        view.addSubview(horizontalStackView)
+        
+        horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
+        chatGPTLabel.translatesAutoresizingMaskIntoConstraints = false
+        orangeCircle.translatesAutoresizingMaskIntoConstraints = false
+        
+        horizontalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        horizontalStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        
+        // 2. Separation between suggestionsCollectionView and the Bottom Stack
+        stackView.spacing = 8  // Adjust this to increase spacing between elements
+        
+        // 3. Remove the Gray Background of the chatContainerView
+        chatContainerView.backgroundColor = .clear
+        
+        // Set constraints for the orangeCircle (only if you want to adjust its size)
+        NSLayoutConstraint.activate([
+            orangeCircle.widthAnchor.constraint(equalToConstant: 40),
+            orangeCircle.heightAnchor.constraint(equalToConstant: 40)
+        ])
     }
     
     private func setupNavigationBar() {
@@ -153,32 +204,27 @@ class ChatViewController: UIViewController {
     }
     
     private func setupLayoutConstraints() {
+        let navigationStack = UIStackView(arrangedSubviews: [leftNavbutton, segmentedControl, rightNavButton])
+        navigationStack.axis = .horizontal
+        navigationStack.distribution = .fillProportionally
+        navigationStack.spacing = 8
+        
+        navigationStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(navigationStack)
+        
         // Left Nav Button
-        leftNavbutton.anchor(
+        navigationStack.anchor(
             top: view.safeAreaLayoutGuide.topAnchor,
             left: view.leftAnchor,
-            paddingTop: 16,
-            paddingLeft: 16
-        )
-        
-        // Right Nav Button
-        rightNavButton.anchor(
-            top: view.safeAreaLayoutGuide.topAnchor,
             right: view.rightAnchor,
             paddingTop: 16,
+            paddingLeft: 16,
             paddingRight: 16
-        )
-        
-        // Segmented Control
-        segmentedControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        segmentedControl.anchor(
-            top: leftNavbutton.bottomAnchor,
-            paddingTop: 8
         )
         
         // Chat TableView
         chatTableView.anchor(
-            top: segmentedControl.bottomAnchor,
+            top: navigationStack.bottomAnchor,
             left: view.leftAnchor,
             bottom: chatContainerView.topAnchor,
             right: view.rightAnchor
@@ -189,7 +235,7 @@ class ChatViewController: UIViewController {
             left: view.leftAnchor,
             bottom: view.safeAreaLayoutGuide.bottomAnchor,
             right: view.rightAnchor,
-            height: 200 // Adjust height based on your needs
+            height: 150 // Adjust height based on your needs
         )
         
         // Suggestions CollectionView
@@ -197,7 +243,7 @@ class ChatViewController: UIViewController {
             top: chatContainerView.topAnchor,
             left: chatContainerView.leftAnchor,
             right: chatContainerView.rightAnchor,
-            height: 150 // Adjust based on your needs
+            height: 100 // Adjust based on your needs
         )
         
         // Bottom Stack View
@@ -210,6 +256,36 @@ class ChatViewController: UIViewController {
             paddingBottom: 10,
             paddingRight: 10
         )
+    }
+    
+    private func animateChatGPTLabel() {
+        // Initial state
+        chatGPTLabel.alpha = 0
+        orangeCircle.alpha = 0
+        orangeCircle.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
+        
+        // Step 1: Show the orange circle with scaling animation
+        UIView.animate(withDuration: 0.5, animations: {
+            self.orangeCircle.alpha = 1
+            self.orangeCircle.transform = CGAffineTransform(scaleX: 1, y: 1)
+        }) { _ in
+            // Step 2: Reveal the ChatGPT label from right to left using a mask
+            let maskLayer = CALayer()
+            maskLayer.backgroundColor = UIColor.black.cgColor
+            maskLayer.frame = CGRect(x: 0, y: 0, width: 0, height: self.chatGPTLabel.frame.height) // Start with 0 width
+            self.chatGPTLabel.layer.mask = maskLayer
+            
+            let animation = CABasicAnimation(keyPath: "bounds.size.width")
+            animation.fromValue = 0
+            animation.toValue = self.chatGPTLabel.frame.width
+            animation.duration = 0.5
+            animation.delegate = self
+            maskLayer.add(animation, forKey: "slide")
+            
+            // Update the final state
+            self.chatGPTLabel.alpha = 1
+            maskLayer.bounds.size.width = self.chatGPTLabel.frame.width
+        }
     }
 }
 
@@ -246,3 +322,5 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 }
+
+extension ChatViewController: CAAnimationDelegate { }
