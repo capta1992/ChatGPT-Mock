@@ -18,6 +18,9 @@ class ChatViewController: UIViewController {
     
     // MARK: - Properties
     
+    private var chatContainerBottomConstraint: NSLayoutConstraint!
+    private var orangeCircleCenterYConstraint: NSLayoutConstraint!
+    
     private let leftNavbutton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
@@ -143,35 +146,13 @@ class ChatViewController: UIViewController {
         view.backgroundColor = .black
         setupNavigationBar()
         setupUIComponents()
+        configureKeyboardNotification()
         
-        chatGPTLabel.numberOfLines = 0
-        chatGPTLabel.adjustsFontSizeToFitWidth = true
+        messageInputField.delegate = self
         
-        // Create a horizontal stack view
-        let horizontalStackView = UIStackView(arrangedSubviews: [chatGPTLabel, orangeCircle])
-        horizontalStackView.axis = .horizontal
-        horizontalStackView.spacing = 2
-        horizontalStackView.distribution = .fill
-        view.addSubview(horizontalStackView)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
         
-        horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
-        chatGPTLabel.translatesAutoresizingMaskIntoConstraints = false
-        orangeCircle.translatesAutoresizingMaskIntoConstraints = false
-        
-        horizontalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        horizontalStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        
-        // 2. Separation between suggestionsCollectionView and the Bottom Stack
-        stackView.spacing = 8  // Adjust this to increase spacing between elements
-        
-        // 3. Remove the Gray Background of the chatContainerView
-        chatContainerView.backgroundColor = .clear
-        
-        // Set constraints for the orangeCircle (only if you want to adjust its size)
-        NSLayoutConstraint.activate([
-            orangeCircle.widthAnchor.constraint(equalToConstant: 40),
-            orangeCircle.heightAnchor.constraint(equalToConstant: 40)
-        ])
     }
     
     private func setupNavigationBar() {
@@ -238,6 +219,9 @@ class ChatViewController: UIViewController {
             height: 150 // Adjust height based on your needs
         )
         
+        chatContainerBottomConstraint = chatContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        chatContainerBottomConstraint.isActive = true
+
         // Suggestions CollectionView
         suggestionsCollectionView.anchor(
             top: chatContainerView.topAnchor,
@@ -256,6 +240,40 @@ class ChatViewController: UIViewController {
             paddingBottom: 10,
             paddingRight: 10
         )
+        
+        chatGPTLabel.numberOfLines = 0
+        chatGPTLabel.adjustsFontSizeToFitWidth = true
+        
+        // Create a horizontal stack view
+        let horizontalStackView = UIStackView(arrangedSubviews: [chatGPTLabel, orangeCircle])
+        horizontalStackView.axis = .horizontal
+        horizontalStackView.spacing = 2
+        horizontalStackView.distribution = .fill
+        view.addSubview(horizontalStackView)
+        
+        horizontalStackView.translatesAutoresizingMaskIntoConstraints = false
+        chatGPTLabel.translatesAutoresizingMaskIntoConstraints = false
+        orangeCircle.translatesAutoresizingMaskIntoConstraints = false
+        
+        horizontalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        orangeCircleCenterYConstraint = horizontalStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        orangeCircleCenterYConstraint.isActive = true
+
+        // 2. Separation between suggestionsCollectionView and the Bottom Stack
+        stackView.spacing = 8
+        
+        chatContainerView.backgroundColor = .clear
+        
+        // Set constraints for the orangeCircle (only if you want to adjust its size)
+        NSLayoutConstraint.activate([
+            orangeCircle.widthAnchor.constraint(equalToConstant: 40),
+            orangeCircle.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+    
+    private func configureKeyboardNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     private func animateChatGPTLabel() {
@@ -286,6 +304,33 @@ class ChatViewController: UIViewController {
             self.chatGPTLabel.alpha = 1
             maskLayer.bounds.size.width = self.chatGPTLabel.frame.width
         }
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func handleKeyboardNotification(notification: NSNotification) {
+        if let userInfo = notification.userInfo {
+            let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+            let isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
+            
+            let adjustmentHeight = isKeyboardShowing ? -keyboardFrame.height : 0
+            chatContainerBottomConstraint.constant = adjustmentHeight
+            
+            // Hide or show the chatGPTLabel based on keyboard state
+            chatGPTLabel.alpha = isKeyboardShowing ? 0 : 1
+            
+            // Adjust the orangeCircle's centerY position
+            orangeCircleCenterYConstraint.constant = adjustmentHeight / 2
+            
+            // Ensure the layout changes animate smoothly with the keyboard appearance
+            UIView.animate(withDuration: 0.5, animations: {
+                self.view.layoutIfNeeded()
+            })
+        }
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
 
@@ -323,4 +368,13 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+// MARK: - CAAnimationDelegate
+
 extension ChatViewController: CAAnimationDelegate { }
+
+extension ChatViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+}
